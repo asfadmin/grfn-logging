@@ -5,7 +5,7 @@ from os.path import basename
 from logging import getLogger
 from gzip import GzipFile
 from datetime import datetime
-from urllib.parse import unquote
+from urllib import unquote
 from io import StringIO
 import re
 import boto3
@@ -38,20 +38,19 @@ index_body = {
 
 
 def setup():
+    log.setLevel('INFO')
     config = json.loads(environ['CONFIG'])
-    log.setLevel(config['log_level'])
-    log.debug('Config: %s', str(config))
     return config
 
 
-def get_elasticsearch_connection(config):
+def get_elasticsearch_connection(host):
     auth = AWSRequestsAuth(aws_access_key=os.getenv('AWS_ACCESS_KEY_ID'),
                            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
                            aws_token=os.getenv('AWS_SESSION_TOKEN'),
                            aws_host=domain_url,
                            aws_region=os.getenv('AWS_REGION'),
                            aws_service='es')
-    es = Elasticsearch(hosts=[{'host': config['host'], 'port': config['port']}],
+    es = Elasticsearch(hosts=[{'host': host, 'port': 443}],
                        use_ssl=True,
                        verify_certs=True,
                        http_auth=auth,
@@ -59,9 +58,9 @@ def get_elasticsearch_connection(config):
     return es
 
 
-def update_elasticsearch(records, config):
+def update_elasticsearch(records, host):
     index = config['index']
-    es = get_elasticsearch_connection(config['server'])
+    es = get_elasticsearch_connection(host)
     if not es.indices.exists(index):
         es.indices.create(index, body=index_body)
     for record in records:
@@ -140,4 +139,4 @@ def lambda_handler(event, context):
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         records = get_log_records(bucket, key)
-        update_elasticsearch(records, config)
+        update_elasticsearch(records, config['host'])
