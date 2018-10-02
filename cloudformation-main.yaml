@@ -32,7 +32,13 @@ Resources:
               "Principal": {
                 "AWS": "*"
               },
-              "Action": "es:*",
+              "Action": [
+                "es:ESHttpGet",
+                "es:ESHttpPut",
+                "es:ESHttpPost",
+                "es:ESHttpDelete",
+                "es:ESHttpHead"
+              ],
               "Resource": "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${Name}/*",
               "Condition": {
                 "IpAddress": {
