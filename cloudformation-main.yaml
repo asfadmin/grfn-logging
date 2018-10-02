@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  Name:
+    Type: String
+
+  LogLevel:
+    Description: Application logging level
+    Type: String
+    Default: INFO
+    AllowedValues:
+    - CRITICAL
+    - ERROR
+    - WARNING
+    - INFO
+    - DEBUG
+
+  ElasticSearchCidrIp:
+    Type: String
+
+Outputs:
+
+  KibanaUrl:
+    Value: !Sub "https://${Domain.DomainEndpoint}/_plugin/kibana/"
+
+Resources:
+
+  Domain:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      DomainName: !Ref Name
+      ElasticsearchVersion: 6.3
+      AccessPolicies: !Sub |-
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": "es:*",
+              "Resource": "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${Name}/*",
+              "Condition": {
+                "IpAddress": {
+                  "aws:SourceIp": "${ElasticSearchCidrIp}"
+                }
+              }
+            }
+          ]
+        }
+      ElasticsearchClusterConfig:
+        DedicatedMasterEnabled: false
+        InstanceCount: 1
+        InstanceType: t2.small.elasticsearch
+        ZoneAwarenessEnabled: false
+      EBSOptions:
+        EBSEnabled: true
+        VolumeSize: 10
+        VolumeType: gp2
