@@ -5,18 +5,10 @@ Parameters:
   Name:
     Type: String
 
-  LogLevel:
-    Description: Application logging level
-    Type: String
-    Default: INFO
-    AllowedValues:
-    - CRITICAL
-    - ERROR
-    - WARNING
-    - INFO
-    - DEBUG
-
   ElasticSearchCidrIp:
+    Type: String
+
+  LogBucket:
     Type: String
 
 Outputs:
@@ -59,3 +51,13 @@ Resources:
         EBSEnabled: true
         VolumeSize: 10
         VolumeType: gp2
+
+  LogParseStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        Name: !Sub "${Name}-log-parse"
+        DomainArn: !GetAtt Domain.DomainArn
+        DomainEndpoint: !GetAtt Domain.DomainEndpoint
+        LogBucket: !Ref LogBucket
+      TemplateURL: log-parse/cloudformation.yaml

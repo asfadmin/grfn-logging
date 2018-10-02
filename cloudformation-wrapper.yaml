@@ -2,18 +2,10 @@ AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
 
-  LogLevel:
-    Description: Application logging level
-    Type: String
-    Default: INFO
-    AllowedValues:
-    - CRITICAL
-    - ERROR
-    - WARNING
-    - INFO
-    - DEBUG
-
   ElasticSearchCidrIp:
+    Type: String
+
+  LogBucket:
     Type: String
 
   Maturity:
@@ -42,6 +34,6 @@ Resources:
         Value: GRFN-LOGGING
       Parameters:
         Name: !Ref AWS::StackName
-        LogLevel: !Ref LogLevel
         ElasticSearchCidrIp: !Ref ElasticSearchCidrIp
+        LogBucket: !Ref LogBucket
       TemplateURL: cloudformation-main.yaml
