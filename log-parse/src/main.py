@@ -1,11 +1,11 @@
 import csv
 import json
-from os import environ
+from os import getenv
 from os.path import basename
 from logging import getLogger
 from gzip import GzipFile
 from datetime import datetime
-from urllib import unquote
+from urllib.parse import unquote
 from io import StringIO
 import re
 import boto3
@@ -16,7 +16,7 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 log = getLogger()
 s3 = boto3.client('s3')
 
-
+index = 'distribution'
 index_body = {
     'dataRecord': {
         'properties': {
@@ -39,16 +39,16 @@ index_body = {
 
 def setup():
     log.setLevel('INFO')
-    config = json.loads(environ['CONFIG'])
+    config = json.loads(getenv('CONFIG'))
     return config
 
 
 def get_elasticsearch_connection(host):
-    auth = AWSRequestsAuth(aws_access_key=os.getenv('AWS_ACCESS_KEY_ID'),
-                           aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-                           aws_token=os.getenv('AWS_SESSION_TOKEN'),
-                           aws_host=domain_url,
-                           aws_region=os.getenv('AWS_REGION'),
+    auth = AWSRequestsAuth(aws_access_key=getenv('AWS_ACCESS_KEY_ID'),
+                           aws_secret_access_key=getenv('AWS_SECRET_ACCESS_KEY'),
+                           aws_token=getenv('AWS_SESSION_TOKEN'),
+                           aws_host=host,
+                           aws_region=getenv('AWS_REGION'),
                            aws_service='es')
     es = Elasticsearch(hosts=[{'host': host, 'port': 443}],
                        use_ssl=True,
@@ -59,7 +59,6 @@ def get_elasticsearch_connection(host):
 
 
 def update_elasticsearch(records, host):
-    index = config['index']
     es = get_elasticsearch_connection(host)
     if not es.indices.exists(index):
         es.indices.create(index, body=index_body)
@@ -67,11 +66,13 @@ def update_elasticsearch(records, host):
         es.index(index=index, id=record['id'], doc_type='log', body=record['data'])
 
 
-def get_user_id(request_query_string):
+def get_user_id(request_query_string, session_role=None):
     userid_pattern = re.compile(r'userid=([a-zA-Z0-9\._]+)')
     result = userid_pattern.search(request_query_string)
     if result:
         return result.group(1)
+    if session_role and 'temporary-credentials-access' in session_role:
+        return session_role.split('/')[-1]
     return ''
 
 
@@ -99,7 +100,7 @@ def get_cloudfront_records(bucket, key):
                 'user_agent': unquote(record[10]),  # TODO fix
             },
         }
-        for record in records if not record[0].startswith('#') #TODO 200/206 GET requests
+        for record in records if not record[0].startswith('#') and record[5] == 'GET' and record[8] in ['200', '206']
     ]
     return marshalled_records
 
@@ -115,14 +116,14 @@ def get_s3_records(bucket, key):
                 'request_time': datetime.strptime(' '.join(record[2:4]), "[%d/%b/%Y:%H:%M:%S %z]"),
                 'ip_address': record[4],
                 'file_name': basename(record[8]),
-                'user_id': get_user_id(record[9]), # TODO deal with signed link or temp cred user ids
+                'user_id': get_user_id(record[9], record[5]),
                 'http_status': to_number(record[10]),
                 'bytes_sent': to_number(record[12]),
                 'referer': record[16],
                 'user_agent': record[17],
             },
         }
-        for record in records if record[7] == 'REST.GET.OBJECT' #TODO filter to distribution requests
+        for record in records if record[7] == 'REST.GET.OBJECT' and record[10] in ['200', '206']
     ]
     return marshalled_records
 

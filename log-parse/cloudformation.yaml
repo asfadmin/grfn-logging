@@ -62,11 +62,12 @@ Resources:
             Resource: !Sub "arn:aws:s3:::${LogBucket}/*"
           - Effect: Allow
             Action:
+            - es:*
             - es:ESHttpGet
             - es:ESHttpHead
             - es:ESHttpPut
             - es:ESHttpPost
-            Resource: !Ref DomainArn
+            Resource: "*"
 
   Lambda:
     Type: AWS::Lambda::Function
@@ -84,7 +85,7 @@ Resources:
       Handler: main.lambda_handler
       MemorySize: 128
       Role: !GetAtt Role.Arn
-      Runtime: python2.7
+      Runtime: python3.6
       Timeout: 60
 
   EventPermission:
