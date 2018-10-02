@@ -16,7 +16,6 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 log = getLogger()
 s3 = boto3.client('s3')
 
-index = 'distribution'
 index_body = {
     'dataRecord': {
         'properties': {
@@ -58,12 +57,12 @@ def get_elasticsearch_connection(host):
     return es
 
 
-def update_elasticsearch(records, host):
-    es = get_elasticsearch_connection(host)
-    if not es.indices.exists(index):
-        es.indices.create(index, body=index_body)
+def update_elasticsearch(records, config):
+    es = get_elasticsearch_connection(config['host'])
+    if not es.indices.exists(config['index']):
+        es.indices.create(config['index'], body=index_body)
     for record in records:
-        es.index(index=index, id=record['id'], doc_type='log', body=record['data'])
+        es.index(index=config['index'], id=record['id'], doc_type='log', body=record['data'])
 
 
 def get_user_id(request_query_string, session_role=None):
@@ -140,4 +139,4 @@ def lambda_handler(event, context):
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         records = get_log_records(bucket, key)
-        update_elasticsearch(records, config['host'])
+        update_elasticsearch(records, config)

@@ -14,6 +14,10 @@ Parameters:
   LogBucket:
     Type: String
 
+  IndexName:
+    Type: String
+    Default: distribution
+
 Outputs:
 
   LambdaName:
@@ -62,12 +66,9 @@ Resources:
             Resource: !Sub "arn:aws:s3:::${LogBucket}/*"
           - Effect: Allow
             Action:
-            - es:*
-            - es:ESHttpGet
             - es:ESHttpHead
             - es:ESHttpPut
-            - es:ESHttpPost
-            Resource: "*"
+            Resource: !Sub "${DomainArn}/${IndexName}*"
 
   Lambda:
     Type: AWS::Lambda::Function
@@ -80,7 +81,8 @@ Resources:
         Variables:
           CONFIG: !Sub |-
             {
-              "host": "${DomainEndpoint}"
+              "host": "${DomainEndpoint}",
+              "index": "${IndexName}"
             }
       Handler: main.lambda_handler
       MemorySize: 128
