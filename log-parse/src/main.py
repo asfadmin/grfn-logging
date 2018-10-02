@@ -95,8 +95,8 @@ def get_cloudfront_records(bucket, key):
                 'user_id': get_user_id(record[11]),
                 'http_status': to_number(record[8]),
                 'bytes_sent': to_number(record[3]),
-                'referer': unquote(record[9]),  #TODO fix
-                'user_agent': unquote(record[10]),  # TODO fix
+                'referer': record[9],
+                'user_agent': unquote(unquote(record[10])),  # TODO fix
             },
         }
         for record in records if not record[0].startswith('#') and record[5] == 'GET' and record[8] in ['200', '206']
