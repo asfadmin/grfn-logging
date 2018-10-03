@@ -106,7 +106,7 @@ def get_cloudfront_records(bucket, key):
 
 def get_s3_records(bucket, key):
     obj = s3.get_object(Bucket=bucket, Key=key)
-    content = obj['Body'].read().decode('utf-8')
+    content = obj['Body'].read().decode()
     records = csv.reader(StringIO(content), delimiter=' ', quotechar='"')
     marshalled_records = [
         {
