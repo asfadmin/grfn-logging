@@ -12,6 +12,8 @@ environment_variables:
 phases:
   build:
     commands:
+      - apt-get update
+      - apt-get install -y python3-pip
       - pip3 install -r log-parse/requirements.txt -t log-parse/src/
       - aws cloudformation package --template-file cloudformation-wrapper.yaml --s3-bucket $BUCKET --s3-prefix $PREFIX --output-template-file cloudformation-final.yaml
 artifacts:
