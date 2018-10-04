@@ -70,3 +70,12 @@ Resources:
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
         LogBucket: !Ref LogBucket
       TemplateURL: log-parse/cloudformation.yaml
+
+  EmsReportStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        Name: !Sub "${Name}-ems-report"
+        DomainArn: !GetAtt Domain.DomainArn
+        DomainEndpoint: !GetAtt Domain.DomainEndpoint
+      TemplateURL: ems-report/cloudformation.yaml
