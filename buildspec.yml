@@ -1,0 +1,20 @@
+# This build script is designed to run in AWS CodeBuild using the aws/codebuild/docker:17.09.0 image
+#   ubuntu 14.04.5
+#   docker 17.09.0
+
+version: 0.1
+
+environment_variables:
+  plaintext:
+    BUCKET: "grfn-software"
+    PREFIX: "lambda"
+
+phases:
+  build:
+    commands:
+      - pip3 install -r log-parse/requirements.txt -t log-parse/src/
+      - aws cloudformation package --template-file cloudformation-wrapper.yaml --s3-bucket $BUCKET --s3-prefix $PREFIX --output-template-file cloudformation-final.yaml
+artifacts:
+  type: zip
+  files:
+    - cloudformation-final.yaml
