@@ -16,6 +16,9 @@ Outputs:
   KibanaUrl:
     Value: !Sub "https://${Domain.DomainEndpoint}/_plugin/kibana/"
 
+  LambdaArn:
+    Value: !GetAtt LogParseStack.Outputs.LambdaArn
+
 Resources:
 
   Domain:

@@ -20,8 +20,8 @@ Parameters:
 
 Outputs:
 
-  LambdaName:
-    Value: !Ref Lambda
+  LambdaArn:
+    Value: !GetAtt Lambda.Arn
 
 Resources:
 
