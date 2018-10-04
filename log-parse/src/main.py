@@ -122,7 +122,7 @@ def get_s3_records(bucket, key):
                 'user_agent': record[17],
             },
         }
-        for record in records if record[7] == 'REST.GET.OBJECT' and record[10] in ['200', '206']
+        for record in records if record[7] == 'REST.GET.OBJECT' and record[10] in ['200', '206'] and record[17] != 'Amazon CloudFront'
     ]
     return marshalled_records
 
