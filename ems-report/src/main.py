@@ -1,8 +1,8 @@
-import csv
 import json
 from os import getenv
 from logging import getLogger
 from datetime import datetime
+from tempfile import NamedTemporaryFile
 import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from aws_requests_auth.aws_auth import AWSRequestsAuth
@@ -54,17 +54,20 @@ def format_request_time(request_time):
 
 def lambda_handler(event, context):
     config = setup()
+    report_date = '2018-10-04'
+    report_name = '20181004_ASF_DistCustom_GRFNBETA.flt'
     es = get_elasticsearch_connection(config['host'])
     results = es.search(
         index=config['index'],
         doc_type='log',
         size=10,
-        q='user_id:asjohnston',
+        q='request_date:{0}'.format(report_date),
     )
     records = [result['_source'] for result in results['hits']['hits']]
-    with open('/tmp/ems.csv', 'w') as f:
+    with NamedTemporaryFile('w') as f:
         for r in records:
             r['category'] = get_category(r['file_name'])
             r['formatted_time'] = format_request_time(r['request_time'])
             f.write('[{formatted_time}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|{http_status}\n'.format(**r))
-    s3.upload_file('/tmp/ems.csv', config['output_bucket'], 'ems.csv')
+        f.flush()
+        s3.upload_file(f.name, config['output_bucket'], report_name)
