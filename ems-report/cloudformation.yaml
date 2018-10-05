@@ -17,7 +17,6 @@ Parameters:
 
   OutputBucket:
     Type: String
-    Default: asjohnston-dev
 
   OutputPrefix:
     Type: String

@@ -82,4 +82,5 @@ Resources:
         Name: !Sub "${Name}-ems-report"
         DomainArn: !GetAtt Domain.DomainArn
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
+        OutputBucket: !Ref LogBucket
       TemplateURL: ems-report/cloudformation.yaml
