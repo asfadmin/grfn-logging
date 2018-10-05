@@ -66,7 +66,7 @@ Resources:
           - Effect: Allow
             Action:
             - es:ESHttpGet
-            Resource: !Sub "${DomainArn}/${IndexName}/*"
+            Resource: !Sub "${DomainArn}/${IndexName}/log/_search*"
           - Effect: Allow
             Action:
             - es:ESHttpGet
