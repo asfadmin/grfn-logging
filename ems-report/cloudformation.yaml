@@ -21,7 +21,7 @@ Parameters:
 
   OutputPrefix:
     Type: String
-    Default: ems_reports/
+    Default: ems-reports/
 
 Resources:
 
