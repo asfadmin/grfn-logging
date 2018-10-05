@@ -67,4 +67,4 @@ def lambda_handler(event, context):
             r['category'] = get_category(r['file_name'])
             r['formatted_time'] = format_request_time(r['request_time'])
             f.write('[{formatted_time}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|{http_status}\n'.format(**r))
-    s3.upload_file('/tmp/ems.csv', 'asjohnston-dev', 'ems.csv')
+    s3.upload_file('/tmp/ems.csv', config['output_bucket'], 'ems.csv')
