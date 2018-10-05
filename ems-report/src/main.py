@@ -45,13 +45,19 @@ def get_category(file_name):
     return category
 
 
+def format_request_time(request_time):
+    input_format = '%Y-%m-%dT%H:%M:%S+00:00'
+    output_format = '%d/%b/%Y:%H:%M:%S'
+    formatted_time = datetime.strftime(datetime.strptime(request_time, input_format), output_format)
+    return formatted_time
+
+
 def lambda_handler(event, context):
     config = setup()
     es = get_elasticsearch_connection(config['host'])
     results = es.search(
         index=config['index'],
         doc_type='log',
-        _source_include=['request_time', 'ip_address', 'user_id', 'http_status', 'file_name', 'bytes_sent'],
         size=10,
         q='user_id:asjohnston',
     )
@@ -59,7 +65,6 @@ def lambda_handler(event, context):
     with open('/tmp/ems.csv', 'w') as f:
         for r in records:
             r['category'] = get_category(r['file_name'])
-            r['formatted_time'] = datetime.strftime(datetime.strptime(r['request_time'], '%Y-%m-%dT%H:%M:%S+00:00'), '%d/%b/%Y:%H:%M:%S')
+            r['formatted_time'] = format_request_time(r['request_time'])
             f.write('[{formatted_time}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|{http_status}\n'.format(**r))
-    s3 = boto3.client('s3')
     s3.upload_file('/tmp/ems.csv', 'asjohnston-dev', 'ems.csv')
