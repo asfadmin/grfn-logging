@@ -14,6 +14,9 @@ Parameters:
   LogBucket:
     Type: String
 
+  S3AccessRoleArn:
+    Type: String
+
   IndexName:
     Type: String
     Default: distribution
@@ -81,8 +84,11 @@ Resources:
         Variables:
           CONFIG: !Sub |-
             {
-              "host": "${DomainEndpoint}",
-              "index": "${IndexName}"
+              "role_arn": "${S3AccessRoleArn}",
+              "elasticsearch": {
+                "host": "${DomainEndpoint}",
+                "index": "${IndexName}"
+              }
             }
       Handler: main.lambda_handler
       MemorySize: 128
