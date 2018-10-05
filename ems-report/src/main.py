@@ -48,7 +48,7 @@ def get_category(file_name):
 def format_request_time(request_time):
     input_format = '%Y-%m-%dT%H:%M:%S+00:00'
     output_format = '%d/%b/%Y:%H:%M:%S'
-    formatted_time = datetime.strftime(datetime.strptime(request_time, input_format), output_format)
+    formatted_time = datetime.strptime(request_time, input_format).strftime(output_format)
     return formatted_time
 
 
