@@ -67,6 +67,11 @@ Resources:
             Action:
             - es:ESHttpGet
             Resource: !Sub "${DomainArn}/${IndexName}/*"
+          - Effect: Allow
+            Action:
+            - es:ESHttpGet
+            - es:ESHttpDelete
+            Resource: !Sub "${DomainArn}/_search/scroll*"
 
   Lambda:
     Type: AWS::Lambda::Function

@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
+from elasticsearch.helpers import scan
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 
 
@@ -47,13 +48,18 @@ def get_category(file_name):
 
 def get_records(report_date, config):
     es = get_elasticsearch_connection(config['host'])
-    results = es.search(
-        index=config['index'],
-        doc_type='log',
-        size=10,
-        q='request_time:{:%Y-%m-%d}'.format(report_date),
-    )
-    records = [result['_source'] for result in results['hits']['hits']]
+    query = {
+        'query': {
+            'range': {
+                'request_time': {
+                    'gte': report_date.strftime('%Y-%m-%d'),
+                    'lte': report_date.strftime('%Y-%m-%d'),
+                }
+            }
+        }
+    }
+    results = scan(es, query=query, index=config['index'], doc_type='log')
+    records = [result['_source'] for result in results]
     return records
 
 
