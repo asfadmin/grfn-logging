@@ -11,6 +11,9 @@ Parameters:
   LogBucket:
     Type: String
 
+  ReportPrefix:
+    Type: String
+
   S3AccessRoleArn:
     Type: String
 
@@ -83,4 +86,5 @@ Resources:
         DomainArn: !GetAtt Domain.DomainArn
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
         OutputBucket: !Ref LogBucket
+        OutputPrefix: !Ref ReportPrefix
       TemplateURL: ems-report/cloudformation.yaml

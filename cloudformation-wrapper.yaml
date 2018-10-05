@@ -42,5 +42,6 @@ Resources:
         Name: !Ref AWS::StackName
         ElasticSearchCidrIp: !Ref ElasticSearchCidrIp
         LogBucket: !Ref LogBucket
+        ReportPrefix: !Sub "ems-reports/${Maturity}/"
         S3AccessRoleArn: !Ref S3AccessRoleArn
       TemplateURL: cloudformation-main.yaml
