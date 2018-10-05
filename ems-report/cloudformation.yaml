@@ -19,6 +19,10 @@ Parameters:
     Type: String
     Default: asjohnston-dev
 
+  OutputPrefix:
+    Type: String
+    Default: ems_reports/
+
 Resources:
 
   DeadLetterQueue:
@@ -76,9 +80,14 @@ Resources:
         Variables:
           CONFIG: !Sub |-
             {
-              "host": "${DomainEndpoint}",
-              "index": "${IndexName}",
-              "output_bucket": "${OutputBucket}"
+              "elasticsearch": {
+                "host": "${DomainEndpoint}",
+                "index": "${IndexName}"
+              },
+              "output": {
+                "bucket": "${OutputBucket}",
+                "prefix": "${OutputPrefix}"
+              }
             }
       Handler: main.lambda_handler
       MemorySize: 128

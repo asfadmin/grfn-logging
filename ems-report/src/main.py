@@ -1,7 +1,7 @@
 import json
 from os import getenv
 from logging import getLogger
-from datetime import datetime
+from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
@@ -45,29 +45,36 @@ def get_category(file_name):
     return category
 
 
-def format_request_time(request_time):
-    input_format = '%Y-%m-%dT%H:%M:%S+00:00'
-    output_format = '%d/%b/%Y:%H:%M:%S'
-    formatted_time = datetime.strptime(request_time, input_format).strftime(output_format)
-    return formatted_time
-
-
-def lambda_handler(event, context):
-    config = setup()
-    report_date = '2018-10-04'
-    report_name = '20181004_ASF_DistCustom_GRFNBETA.flt'
+def get_records(report_date, config):
     es = get_elasticsearch_connection(config['host'])
     results = es.search(
         index=config['index'],
         doc_type='log',
         size=10,
-        q='request_time:{0}'.format(report_date),
+        q='request_time:{:%Y-%m-%d}'.format(report_date),
     )
     records = [result['_source'] for result in results['hits']['hits']]
+    return records
+
+
+def generate_ems_report(report_date, config):
+    log.info('Generating GRFN EMS report for {:%Y-%m-%d}'.format(report_date))
+    records = get_records(report_date, config['elasticsearch'])
+
+    report_name = '{0}{1:%Y%m%d}_ASF_DistCustom_GRFNBETA.flt'.format(config['output']['prefix'], report_date)
     with NamedTemporaryFile('w') as f:
         for r in records:
             r['category'] = get_category(r['file_name'])
-            r['formatted_time'] = format_request_time(r['request_time'])
-            f.write('[{formatted_time}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|{http_status}\n'.format(**r))
+            r['parsed_time'] = datetime.strptime(r['request_time'], '%Y-%m-%dT%H:%M:%S+00:00')
+            f.write('[{parsed_time:%d/%b/%Y:%H:%M:%S}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|{http_status}\n'.format(**r))
         f.flush()
-        s3.upload_file(f.name, config['output_bucket'], report_name)
+        s3.upload_file(f.name, config['output']['bucket'], report_name)
+
+
+def lambda_handler(event, context):
+    config = setup()
+    if 'report_date' in event:
+        report_date = datetime.strptime(event['report_date'], '%Y-%m-%d')
+    else:
+        report_date = datetime.utcnow() - timedelta(1)
+    generate_ems_report(report_date, config)
