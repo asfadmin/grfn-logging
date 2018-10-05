@@ -63,7 +63,7 @@ Resources:
           - Effect: Allow
             Action:
             - es:ESHttpGet
-            Resource: !Sub "${DomainArn}/${IndexName}*"
+            Resource: !Sub "${DomainArn}/${IndexName}/*"
 
   Lambda:
     Type: AWS::Lambda::Function
@@ -77,7 +77,8 @@ Resources:
           CONFIG: !Sub |-
             {
               "host": "${DomainEndpoint}",
-              "index": "${IndexName}"
+              "index": "${IndexName}",
+              "output_bucket": "${OutputBucket}"
             }
       Handler: main.lambda_handler
       MemorySize: 128
