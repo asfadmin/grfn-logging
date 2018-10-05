@@ -61,7 +61,7 @@ Resources:
             Resource: !GetAtt DeadLetterQueue.Arn
           - Effect: Allow
             Action: s3:PutObject
-            Resource: !Sub "arn:aws:s3:::${OutputBucket}/*"
+            Resource: !Sub "arn:aws:s3:::${OutputBucket}/${OutputPrefix}*"
           - Effect: Allow
             Action:
             - es:ESHttpGet
