@@ -5,7 +5,6 @@ from os.path import basename
 from logging import getLogger
 from gzip import GzipFile
 from datetime import datetime
-from urllib.parse import unquote
 from io import StringIO
 import re
 import boto3
@@ -25,8 +24,6 @@ index_body = {
             'ip_address':   {'type': 'ip'},
             'http_status':  {'type': 'long'},
             'bytes_sent':   {'type': 'long'},
-            'referer':      {'type': 'string'},
-            'user_agent':   {'type': 'string'},
         },
     },
     'settings': {
@@ -65,13 +62,11 @@ def update_elasticsearch(records, config):
         es.index(index=config['index'], id=record['id'], doc_type='log', body=record['data'])
 
 
-def get_user_id(request_query_string, session_role=None):
+def get_user_id(request_query_string):
     userid_pattern = re.compile(r'userid=([a-zA-Z0-9\._]+)')
     result = userid_pattern.search(request_query_string)
     if result:
         return result.group(1)
-    if session_role and 'temporary-credentials-access' in session_role:
-        return session_role.split('/')[-1]
     return ''
 
 
@@ -95,8 +90,6 @@ def get_cloudfront_records(bucket, key):
                 'user_id': get_user_id(record[11]),
                 'http_status': to_number(record[8]),
                 'bytes_sent': to_number(record[3]),
-                'referer': record[9],
-                'user_agent': unquote(unquote(record[10])),  # TODO fix
             },
         }
         for record in records if not record[0].startswith('#') and record[5] == 'GET' and record[8] in ['200', '206']
@@ -104,7 +97,7 @@ def get_cloudfront_records(bucket, key):
     return marshalled_records
 
 
-def get_s3_records(bucket, key):
+def get_s3_records(bucket, key, role_arn):
     obj = s3.get_object(Bucket=bucket, Key=key)
     content = obj['Body'].read().decode()
     records = csv.reader(StringIO(content), delimiter=' ', quotechar='"')
@@ -115,22 +108,20 @@ def get_s3_records(bucket, key):
                 'request_time': datetime.strptime(' '.join(record[2:4]), "[%d/%b/%Y:%H:%M:%S %z]"),
                 'ip_address': record[4],
                 'file_name': basename(record[8]),
-                'user_id': get_user_id(record[9], record[5]),
+                'user_id': record[5].split('/')[-1],
                 'http_status': to_number(record[10]),
                 'bytes_sent': to_number(record[12]),
-                'referer': record[16],
-                'user_agent': record[17],
             },
         }
-        for record in records if record[7] == 'REST.GET.OBJECT' and record[10] in ['200', '206'] and record[17] != 'Amazon CloudFront'
+        for record in records if record[7] == 'REST.GET.OBJECT' and record[10] in ['200', '206'] and record[5].startswith(role_arn)
     ]
     return marshalled_records
 
 
-def get_log_records(bucket, key):
+def get_log_records(bucket, key, role_arn):
     if key.endswith('.gz'):
         return get_cloudfront_records(bucket, key)
-    return get_s3_records(bucket, key)
+    return get_s3_records(bucket, key, role_arn)
 
 
 def lambda_handler(event, context):
@@ -138,5 +129,5 @@ def lambda_handler(event, context):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        records = get_log_records(bucket, key)
-        update_elasticsearch(records, config)
+        records = get_log_records(bucket, key, config['role_arn'])
+        update_elasticsearch(records, config['elasticsearch'])

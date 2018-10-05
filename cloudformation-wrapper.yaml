@@ -8,6 +8,9 @@ Parameters:
   LogBucket:
     Type: String
 
+  S3AccessRoleArn:
+    Type: String
+
   Maturity:
     Description: Value for MATURITY tag to be applied to all taggable resources
     Type: String
@@ -39,4 +42,5 @@ Resources:
         Name: !Ref AWS::StackName
         ElasticSearchCidrIp: !Ref ElasticSearchCidrIp
         LogBucket: !Ref LogBucket
+        S3AccessRoleArn: !Ref S3AccessRoleArn
       TemplateURL: cloudformation-main.yaml
