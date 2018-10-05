@@ -63,18 +63,22 @@ def get_records(report_date, config):
     return records
 
 
-def generate_ems_report(report_date, config):
-    log.info('Generating GRFN EMS report for {:%Y-%m-%d}'.format(report_date))
-    records = get_records(report_date, config['elasticsearch'])
-
-    report_name = '{0}{1:%Y%m%d}_ASF_DistCustom_GRFNBETA.flt'.format(config['output']['prefix'], report_date)
+def upload_report(records, report_date, config):
+    report_name = '{0}{1:%Y%m%d}_ASF_DistCustom_GRFNBETA.flt'.format(config['prefix'], report_date)
+    log.info('Uploading report to s3://{0}/{1}'.format(config['bucket'], report_name))
     with NamedTemporaryFile('w') as f:
         for r in records:
             r['category'] = get_category(r['file_name'])
             r['parsed_time'] = datetime.strptime(r['request_time'], '%Y-%m-%dT%H:%M:%S+00:00')
             f.write('[{parsed_time:%d/%b/%Y:%H:%M:%S}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|{http_status}\n'.format(**r))
         f.flush()
-        s3.upload_file(f.name, config['output']['bucket'], report_name)
+        s3.upload_file(f.name, config['bucket'], report_name)
+
+
+def generate_ems_report(report_date, config):
+    log.info('Generating GRFN EMS report for {:%Y-%m-%d}'.format(report_date))
+    records = get_records(report_date, config['elasticsearch'])
+    upload_report(records, report_date, config['output'])
 
 
 def lambda_handler(event, context):
