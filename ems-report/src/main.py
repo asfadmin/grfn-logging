@@ -61,7 +61,7 @@ def lambda_handler(event, context):
         index=config['index'],
         doc_type='log',
         size=10,
-        q='request_date:{0}'.format(report_date),
+        q='request_time:{0}'.format(report_date),
     )
     records = [result['_source'] for result in results['hits']['hits']]
     with NamedTemporaryFile('w') as f:
