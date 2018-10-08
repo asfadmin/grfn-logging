@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  ElasticSearchCidrIp:
+    Type: String
+
+  LogBucket:
+    Type: String
+
+  S3AccessRoleArn:
+    Type: String
+
+  Maturity:
+    Description: Value for MATURITY tag to be applied to all taggable resources
+    Type: String
+    Default: DEV
+    AllowedValues:
+    - DEV
+    - TEST
+    - PROD
+
+Outputs:
+
+  KibanaUrl:
+    Value: !GetAtt MainStack.Outputs.KibanaUrl
+
+  LambdaArn:
+    Value: !GetAtt MainStack.Outputs.LambdaArn
+
+Resources:
+
+  MainStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+      - Key: MATURITY
+        Value: !Ref Maturity
+      - Key: APPLICATION
+        Value: GRFN-LOGGING
+      Parameters:
+        Name: !Ref AWS::StackName
+        ElasticSearchCidrIp: !Ref ElasticSearchCidrIp
+        LogBucket: !Ref LogBucket
+        ReportPrefix: !Sub "ems-reports/${Maturity}/"
+        S3AccessRoleArn: !Ref S3AccessRoleArn
+      TemplateURL: cloudformation-main.yaml

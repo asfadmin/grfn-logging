@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  Name:
+    Type: String
+
+  ElasticSearchCidrIp:
+    Type: String
+
+  IndexName:
+    Type: String
+    Default: distribution
+
+  LogBucket:
+    Type: String
+
+  ReportPrefix:
+    Type: String
+
+  S3AccessRoleArn:
+    Type: String
+
+Outputs:
+
+  KibanaUrl:
+    Value: !Sub "https://${Domain.DomainEndpoint}/_plugin/kibana/"
+
+  LambdaArn:
+    Value: !GetAtt LogParseStack.Outputs.LambdaArn
+
+Resources:
+
+  Domain:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      DomainName: !Ref Name
+      ElasticsearchVersion: 6.3
+      AccessPolicies: !Sub |-
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": [
+                "es:ESHttpGet",
+                "es:ESHttpPut",
+                "es:ESHttpPost",
+                "es:ESHttpDelete",
+                "es:ESHttpHead"
+              ],
+              "Resource": "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${Name}/*",
+              "Condition": {
+                "IpAddress": {
+                  "aws:SourceIp": "${ElasticSearchCidrIp}"
+                }
+              }
+            }
+          ]
+        }
+      ElasticsearchClusterConfig:
+        DedicatedMasterEnabled: false
+        InstanceCount: 1
+        InstanceType: t2.small.elasticsearch
+        ZoneAwarenessEnabled: false
+      EBSOptions:
+        EBSEnabled: true
+        VolumeSize: 10
+        VolumeType: gp2
+
+  LogParseStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        Name: !Sub "${Name}-log-parse"
+        DomainArn: !GetAtt Domain.DomainArn
+        DomainEndpoint: !GetAtt Domain.DomainEndpoint
+        IndexName: !Ref IndexName
+        LogBucket: !Ref LogBucket
+        S3AccessRoleArn: !Ref S3AccessRoleArn
+      TemplateURL: log-parse/cloudformation.yaml
+
+  EmsReportStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        Name: !Sub "${Name}-ems-report"
+        DomainArn: !GetAtt Domain.DomainArn
+        DomainEndpoint: !GetAtt Domain.DomainEndpoint
+        IndexName: !Ref IndexName
+        OutputBucket: !Ref LogBucket
+        OutputPrefix: !Ref ReportPrefix
+      TemplateURL: ems-report/cloudformation.yaml
