@@ -129,5 +129,6 @@ def lambda_handler(event, context):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
+        log.info('Processing file s3://{0}/{1}'.format(bucket, key))
         records = get_log_records(bucket, key, config['role_arn'])
         update_elasticsearch(records, config['elasticsearch'])
