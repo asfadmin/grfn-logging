@@ -13,7 +13,6 @@ Parameters:
 
   IndexName:
     Type: String
-    Default: distribution
 
   OutputBucket:
     Type: String

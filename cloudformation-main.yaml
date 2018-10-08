@@ -8,6 +8,10 @@ Parameters:
   ElasticSearchCidrIp:
     Type: String
 
+  IndexName:
+    Type: String
+    Default: distribution
+
   LogBucket:
     Type: String
 
@@ -74,6 +78,7 @@ Resources:
         Name: !Sub "${Name}-log-parse"
         DomainArn: !GetAtt Domain.DomainArn
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
+        IndexName: !Ref IndexName
         LogBucket: !Ref LogBucket
         S3AccessRoleArn: !Ref S3AccessRoleArn
       TemplateURL: log-parse/cloudformation.yaml
@@ -85,6 +90,7 @@ Resources:
         Name: !Sub "${Name}-ems-report"
         DomainArn: !GetAtt Domain.DomainArn
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
+        IndexName: !Ref IndexName
         OutputBucket: !Ref LogBucket
         OutputPrefix: !Ref ReportPrefix
       TemplateURL: ems-report/cloudformation.yaml

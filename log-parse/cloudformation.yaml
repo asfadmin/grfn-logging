@@ -11,15 +11,14 @@ Parameters:
   DomainEndpoint:
     Type: String
 
+  IndexName:
+    Type: String
+
   LogBucket:
     Type: String
 
   S3AccessRoleArn:
     Type: String
-
-  IndexName:
-    Type: String
-    Default: distribution
 
 Outputs:
 
