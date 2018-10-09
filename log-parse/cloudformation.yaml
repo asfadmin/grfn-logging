@@ -17,6 +17,9 @@ Parameters:
   LogBucket:
     Type: String
 
+  NgapLogBucket:
+    Type: String
+
   S3AccessRoleArn:
     Type: String
 
@@ -65,7 +68,9 @@ Resources:
             Resource: !GetAtt DeadLetterQueue.Arn
           - Effect: Allow
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${LogBucket}/*"
+            Resource:
+            - !Sub "arn:aws:s3:::${LogBucket}/*"
+            - !Sub "arn:aws:s3:::${NgapLogBucket}/*"
           - Effect: Allow
             Action:
             - es:ESHttpHead
@@ -102,3 +107,11 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
       SourceArn: !Sub "arn:aws:s3:::${LogBucket}"
+
+  NgapEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt Lambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !Sub "arn:aws:s3:::${NgapLogBucket}"

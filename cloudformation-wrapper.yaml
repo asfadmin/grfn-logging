@@ -8,6 +8,9 @@ Parameters:
   LogBucket:
     Type: String
 
+  NgapLogBucket:
+    Type: String
+
   S3AccessRoleArn:
     Type: String
 
@@ -42,6 +45,7 @@ Resources:
         Name: !Ref AWS::StackName
         ElasticSearchCidrIp: !Ref ElasticSearchCidrIp
         LogBucket: !Ref LogBucket
+        NgapLogBucket: !Ref NgapLogBucket
         ReportPrefix: !Sub "ems-reports/${Maturity}/"
         S3AccessRoleArn: !Ref S3AccessRoleArn
       TemplateURL: cloudformation-main.yaml
