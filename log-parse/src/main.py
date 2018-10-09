@@ -97,7 +97,7 @@ def get_cloudfront_records(bucket, key):
     return marshalled_records
 
 
-def get_s3_records(bucket, key, role_arn):
+def get_s3_records(bucket, key, role_session_arn):
     obj = s3.get_object(Bucket=bucket, Key=key)
     content = obj['Body'].read().decode()
     records = csv.reader(StringIO(content), delimiter=' ', quotechar='"')
@@ -113,7 +113,7 @@ def get_s3_records(bucket, key, role_arn):
                 'bytes_sent': to_number(record[12]),
             },
         }
-        for record in records if record[7] == 'REST.GET.OBJECT' and record[10] in ['200', '206'] and record[5].startswith(role_arn)
+        for record in records if record[7] == 'REST.GET.OBJECT' and record[10] in ['200', '206'] and record[5].startswith(role_session_arn)
     ]
     return marshalled_records
 
@@ -130,5 +130,5 @@ def lambda_handler(event, context):
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         log.info('Processing file s3://{0}/{1}'.format(bucket, key))
-        records = get_log_records(bucket, key, config['role_arn'])
+        records = get_log_records(bucket, key, config['role_session_arn'])
         update_elasticsearch(records, config['elasticsearch'])

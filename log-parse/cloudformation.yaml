@@ -17,7 +17,10 @@ Parameters:
   LogBucket:
     Type: String
 
-  S3AccessRoleArn:
+  NgapLogBucket:
+    Type: String
+
+  S3AccessRoleName:
     Type: String
 
 Outputs:
@@ -65,7 +68,9 @@ Resources:
             Resource: !GetAtt DeadLetterQueue.Arn
           - Effect: Allow
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${LogBucket}/*"
+            Resource:
+            - !Sub "arn:aws:s3:::${LogBucket}/*"
+            - !Sub "arn:aws:s3:::${NgapLogBucket}/*"
           - Effect: Allow
             Action:
             - es:ESHttpHead
@@ -83,7 +88,7 @@ Resources:
         Variables:
           CONFIG: !Sub |-
             {
-              "role_arn": "${S3AccessRoleArn}",
+              "role_session_arn": "arn:aws:sts::${AWS::AccountId}:assumed-role/${S3AccessRoleName}/",
               "elasticsearch": {
                 "host": "${DomainEndpoint}",
                 "index": "${IndexName}"
@@ -102,3 +107,11 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
       SourceArn: !Sub "arn:aws:s3:::${LogBucket}"
+
+  NgapEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt Lambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !Sub "arn:aws:s3:::${NgapLogBucket}"
