@@ -20,7 +20,7 @@ Parameters:
   NgapLogBucket:
     Type: String
 
-  S3AccessRoleArn:
+  S3AccessRoleName:
     Type: String
 
 Outputs:
@@ -88,7 +88,7 @@ Resources:
         Variables:
           CONFIG: !Sub |-
             {
-              "role_arn": "${S3AccessRoleArn}",
+              "role_session_arn": "arn:aws:sts::${AWS::AccountId}:assumed-role/${S3AccessRoleName}/",
               "elasticsearch": {
                 "host": "${DomainEndpoint}",
                 "index": "${IndexName}"

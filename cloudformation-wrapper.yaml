@@ -11,7 +11,7 @@ Parameters:
   NgapLogBucket:
     Type: String
 
-  S3AccessRoleArn:
+  S3AccessRoleName:
     Type: String
 
   Maturity:
@@ -47,5 +47,5 @@ Resources:
         LogBucket: !Ref LogBucket
         NgapLogBucket: !Ref NgapLogBucket
         ReportPrefix: !Sub "ems-reports/${Maturity}/"
-        S3AccessRoleArn: !Ref S3AccessRoleArn
+        S3AccessRoleName: !Ref S3AccessRoleName
       TemplateURL: cloudformation-main.yaml

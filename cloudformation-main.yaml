@@ -21,7 +21,7 @@ Parameters:
   ReportPrefix:
     Type: String
 
-  S3AccessRoleArn:
+  S3AccessRoleName:
     Type: String
 
 Outputs:
@@ -84,7 +84,7 @@ Resources:
         IndexName: !Ref IndexName
         LogBucket: !Ref LogBucket
         NgapLogBucket: !Ref NgapLogBucket
-        S3AccessRoleArn: !Ref S3AccessRoleArn
+        S3AccessRoleName: !Ref S3AccessRoleName
       TemplateURL: log-parse/cloudformation.yaml
 
   EmsReportStack:
