@@ -4,11 +4,6 @@
 
 version: 0.1
 
-environment_variables:
-  plaintext:
-    BUCKET: "grfn-software"
-    PREFIX: "lambda"
-
 phases:
   build:
     commands:
