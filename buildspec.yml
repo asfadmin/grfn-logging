@@ -1,14 +1,11 @@
-# This build script is designed to run in AWS CodeBuild using the aws/codebuild/docker:17.09.0 image
-#   ubuntu 14.04.5
-#   docker 17.09.0
-
-version: 0.1
+version: 0.2
 
 phases:
+  install:
+    runtime-versions:
+      python: 3.8
   build:
     commands:
-      - apt-get update
-      - apt-get install -y python3-pip
       - pip3 install -r log-parse/requirements.txt -t log-parse/src/
       - pip3 install -r ems-report/requirements.txt -t ems-report/src/
       - aws cloudformation package --template-file cloudformation-wrapper.yaml --s3-bucket $BUCKET --s3-prefix $PREFIX --output-template-file cloudformation-final.yaml
