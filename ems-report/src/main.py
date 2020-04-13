@@ -36,13 +36,11 @@ def get_elasticsearch_connection(host):
 
 def get_category(file_name):
     if file_name.endswith('.png'):
-        category = 'SENTINEL-1_INSAR_UNWRAPPED_INTERFEROGRAM_AND_COHERENCE_MAP_BROWSE (BETA)'
+        category = 'SENTINEL-1_INTERFEROGRAMS_BROWSE'
     elif file_name.endswith('.unw_geo.zip'):
-        category = 'SENTINEL-1_INSAR_UNWRAPPED_INTERFEROGRAM_AND_COHERENCE_MAP (BETA)'
-    elif file_name.endswith('.full_res.zip'):
-        category = 'SENTINEL-1_INSAR_FULL_RES_WRAPPED_INTERFEROGRAM_AND_DEM (BETA)'
+        category = 'SENTINEL-1_INSAR_UNWRAPPED_INTERFEROGRAM_AND_COHERENCE_MAP'
     else:
-        category = 'SENTINEL-1_INSAR_ALL_INTERFEROMETRIC_PRODUCTS (BETA)'
+        category = 'SENTINEL-1_INTERFEROGRAMS'
     return category
 
 
