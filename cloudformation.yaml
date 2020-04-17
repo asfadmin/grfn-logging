@@ -15,13 +15,7 @@ Parameters:
   LogBucket:
     Type: String
 
-  NgapLogBucket:
-    Type: String
-
   ReportPrefix:
-    Type: String
-
-  S3AccessRoleName:
     Type: String
 
 Outputs:
@@ -83,8 +77,6 @@ Resources:
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
         IndexName: !Ref IndexName
         LogBucket: !Ref LogBucket
-        NgapLogBucket: !Ref NgapLogBucket
-        S3AccessRoleName: !Ref S3AccessRoleName
       TemplateURL: log-parse/cloudformation.yaml
 
   EmsReportStack:
