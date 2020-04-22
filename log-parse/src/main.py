@@ -16,11 +16,11 @@ log = getLogger()
 s3 = boto3.client('s3')
 
 index_body = {
-    'dataRecord': {
+    'mappings': {
         'properties': {
             'request_time': {'type': 'date'},
-            'file_name':    {'type': 'string'},
-            'user_id':      {'type': 'string'},
+            'file_name':    {'type': 'keyword'},
+            'user_id':      {'type': 'keyword'},
             'ip_address':   {'type': 'ip'},
             'http_status':  {'type': 'long'},
             'bytes_sent':   {'type': 'long'},
@@ -59,7 +59,7 @@ def update_elasticsearch(records, config):
     if not es.indices.exists(config['index']):
         es.indices.create(config['index'], body=index_body)
     for record in records:
-        es.index(index=config['index'], id=record['id'], doc_type='log', body=record['data'])
+        es.index(index=config['index'], id=record['id'], body=record['data'])
 
 
 def get_user_id(request_query_string):
@@ -97,38 +97,11 @@ def get_cloudfront_records(bucket, key):
     return marshalled_records
 
 
-def get_s3_records(bucket, key, role_session_arn):
-    obj = s3.get_object(Bucket=bucket, Key=key)
-    content = obj['Body'].read().decode()
-    records = csv.reader(StringIO(content), delimiter=' ', quotechar='"')
-    marshalled_records = [
-        {
-            'id': record[6],
-            'data': {
-                'request_time': datetime.strptime(' '.join(record[2:4]), "[%d/%b/%Y:%H:%M:%S %z]"),
-                'ip_address': record[4],
-                'file_name': basename(record[8]),
-                'user_id': record[5].split('/')[-1],
-                'http_status': to_number(record[10]),
-                'bytes_sent': to_number(record[12]),
-            },
-        }
-        for record in records if record[7] == 'REST.GET.OBJECT' and record[10] in ['200', '206'] and record[5].startswith(role_session_arn)
-    ]
-    return marshalled_records
-
-
-def get_log_records(bucket, key, role_arn):
-    if key.endswith('.gz'):
-        return get_cloudfront_records(bucket, key)
-    return get_s3_records(bucket, key, role_arn)
-
-
 def lambda_handler(event, context):
     config = setup()
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         log.info('Processing file s3://{0}/{1}'.format(bucket, key))
-        records = get_log_records(bucket, key, config['role_session_arn'])
-        update_elasticsearch(records, config['elasticsearch'])
+        records = get_cloudfront_records(bucket, key)
+        update_elasticsearch(records, config)

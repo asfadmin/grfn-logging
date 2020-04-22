@@ -2,9 +2,6 @@ AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
 
-  Name:
-    Type: String
-
   ElasticSearchCidrIp:
     Type: String
 
@@ -15,13 +12,7 @@ Parameters:
   LogBucket:
     Type: String
 
-  NgapLogBucket:
-    Type: String
-
   ReportPrefix:
-    Type: String
-
-  S3AccessRoleName:
     Type: String
 
 Outputs:
@@ -37,8 +28,8 @@ Resources:
   Domain:
     Type: AWS::Elasticsearch::Domain
     Properties:
-      DomainName: !Ref Name
-      ElasticsearchVersion: 6.3
+      DomainName: !Ref AWS::StackName
+      ElasticsearchVersion: 7.4
       AccessPolicies: !Sub |-
         {
           "Version": "2012-10-17",
@@ -55,7 +46,7 @@ Resources:
                 "es:ESHttpDelete",
                 "es:ESHttpHead"
               ],
-              "Resource": "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${Name}/*",
+              "Resource": "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${AWS::StackName}/*",
               "Condition": {
                 "IpAddress": {
                   "aws:SourceIp": "${ElasticSearchCidrIp}"
@@ -78,20 +69,18 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        Name: !Sub "${Name}-log-parse"
+        Name: !Sub "${AWS::StackName}-log-parse"
         DomainArn: !GetAtt Domain.DomainArn
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
         IndexName: !Ref IndexName
         LogBucket: !Ref LogBucket
-        NgapLogBucket: !Ref NgapLogBucket
-        S3AccessRoleName: !Ref S3AccessRoleName
       TemplateURL: log-parse/cloudformation.yaml
 
   EmsReportStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        Name: !Sub "${Name}-ems-report"
+        Name: !Sub "${AWS::StackName}-ems-report"
         DomainArn: !GetAtt Domain.DomainArn
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
         IndexName: !Ref IndexName
