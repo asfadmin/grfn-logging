@@ -1,2 +1,2 @@
 aws-requests-auth==0.4.2
-elasticsearch==6.3.0
+elasticsearch==7.5.1

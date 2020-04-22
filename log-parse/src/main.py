@@ -16,11 +16,11 @@ log = getLogger()
 s3 = boto3.client('s3')
 
 index_body = {
-    'dataRecord': {
+    'mappings': {
         'properties': {
             'request_time': {'type': 'date'},
-            'file_name':    {'type': 'string'},
-            'user_id':      {'type': 'string'},
+            'file_name':    {'type': 'keyword'},
+            'user_id':      {'type': 'keyword'},
             'ip_address':   {'type': 'ip'},
             'http_status':  {'type': 'long'},
             'bytes_sent':   {'type': 'long'},
@@ -59,7 +59,7 @@ def update_elasticsearch(records, config):
     if not es.indices.exists(config['index']):
         es.indices.create(config['index'], body=index_body)
     for record in records:
-        es.index(index=config['index'], id=record['id'], doc_type='log', body=record['data'])
+        es.index(index=config['index'], id=record['id'], body=record['data'])
 
 
 def get_user_id(request_query_string):

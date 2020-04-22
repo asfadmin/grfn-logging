@@ -56,7 +56,7 @@ def get_records(report_date, config):
             }
         }
     }
-    results = scan(es, query=query, index=config['index'], doc_type='log')
+    results = scan(es, query=query, index=config['index'])
     records = [result['_source'] for result in results]
     return records
 
