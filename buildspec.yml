@@ -8,7 +8,7 @@ phases:
     commands:
       - pip3 install -r log-parse/requirements.txt -t log-parse/src/
       - pip3 install -r ems-report/requirements.txt -t ems-report/src/
-      - aws cloudformation package --template-file cloudformation-wrapper.yaml --s3-bucket $BUCKET --s3-prefix $PREFIX --output-template-file cloudformation-final.yaml
+      - aws cloudformation package --template-file cloudformation.yaml --s3-bucket $BUCKET --s3-prefix $PREFIX --output-template-file cloudformation-final.yaml
 artifacts:
   type: zip
   files:
