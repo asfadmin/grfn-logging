@@ -64,10 +64,8 @@ Resources:
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::${LogBucket}/*"
           - Effect: Allow
-            Action:
-            - es:ESHttpHead
-            - es:ESHttpPut
-            Resource: !Sub "${DomainArn}/${IndexName}*"
+            Action: es:ESHttpPost
+            Resource: !Sub "${DomainArn}/_bulk"
 
   Lambda:
     Type: AWS::Lambda::Function
