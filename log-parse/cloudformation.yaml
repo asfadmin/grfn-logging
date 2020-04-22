@@ -66,8 +66,9 @@ Resources:
           - Effect: Allow
             Action:
             - es:ESHttpHead
+            - es:ESHttpPost
             - es:ESHttpPut
-            Resource: !Sub "${DomainArn}/${IndexName}*"
+            Resource: !Sub "${DomainArn}/*"
 
   Lambda:
     Type: AWS::Lambda::Function

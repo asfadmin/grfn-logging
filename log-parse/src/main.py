@@ -9,6 +9,7 @@ from io import StringIO
 import re
 import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
+from elasticsearch.helpers import bulk
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 
 
@@ -59,7 +60,8 @@ def update_elasticsearch(records, config):
     if not es.indices.exists(config['index']):
         es.indices.create(config['index'], body=index_body)
     for record in records:
-        es.index(index=config['index'], id=record['id'], body=record['data'])
+        record['_index'] = config['index']
+    bulk(es, records)
 
 
 def get_user_id(request_query_string):
@@ -82,15 +84,13 @@ def get_cloudfront_records(bucket, key):
     records = csv.reader(StringIO(content), delimiter='\t')
     marshalled_records = [
         {
-            'id': record[14],
-            'data': {
-                'request_time': datetime.strptime(record[0]+record[1]+'+0000', "%Y-%m-%d%H:%M:%S%z"),
-                'ip_address': record[4],
-                'file_name': basename(record[7]),
-                'user_id': get_user_id(record[11]),
-                'http_status': to_number(record[8]),
-                'bytes_sent': to_number(record[3]),
-            },
+            '_id': record[14],
+            'request_time': datetime.strptime(record[0]+record[1]+'+0000', "%Y-%m-%d%H:%M:%S%z"),
+            'ip_address': record[4],
+            'file_name': basename(record[7]),
+            'user_id': get_user_id(record[11]),
+            'http_status': to_number(record[8]),
+            'bytes_sent': to_number(record[3]),
         }
         for record in records if not record[0].startswith('#') and record[5] == 'GET' and record[8] in ['200', '206']
     ]
