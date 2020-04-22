@@ -64,7 +64,7 @@ Resources:
           - Effect: Allow
             Action:
             - es:ESHttpGet
-            Resource: !Sub "${DomainArn}/${IndexName}/_doc/_search*"
+            Resource: !Sub "${DomainArn}/${IndexName}/_search*"
           - Effect: Allow
             Action:
             - es:ESHttpGet
