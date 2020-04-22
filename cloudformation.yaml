@@ -2,9 +2,6 @@ AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
 
-  Name:
-    Type: String
-
   ElasticSearchCidrIp:
     Type: String
 
@@ -31,7 +28,7 @@ Resources:
   Domain:
     Type: AWS::Elasticsearch::Domain
     Properties:
-      DomainName: !Ref Name
+      DomainName: !Ref AWS::StackName
       ElasticsearchVersion: 6.3
       AccessPolicies: !Sub |-
         {
@@ -49,7 +46,7 @@ Resources:
                 "es:ESHttpDelete",
                 "es:ESHttpHead"
               ],
-              "Resource": "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${Name}/*",
+              "Resource": "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${AWS::StackName}/*",
               "Condition": {
                 "IpAddress": {
                   "aws:SourceIp": "${ElasticSearchCidrIp}"
@@ -72,7 +69,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        Name: !Sub "${Name}-log-parse"
+        Name: !Sub "${AWS::StackName}-log-parse"
         DomainArn: !GetAtt Domain.DomainArn
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
         IndexName: !Ref IndexName
@@ -83,7 +80,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        Name: !Sub "${Name}-ems-report"
+        Name: !Sub "${AWS::StackName}-ems-report"
         DomainArn: !GetAtt Domain.DomainArn
         DomainEndpoint: !GetAtt Domain.DomainEndpoint
         IndexName: !Ref IndexName
