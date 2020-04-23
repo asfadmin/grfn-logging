@@ -67,7 +67,10 @@ Resources:
             Action:
             - es:ESHttpHead
             - es:ESHttpPut
-            Resource: !Sub "${DomainArn}/${IndexName}*"
+            Resource: !Sub "${DomainArn}/${IndexName}"
+          - Effect: Allow
+            Action: es:ESHttpPost
+            Resource: !Sub "${DomainArn}/_bulk"
 
   Lambda:
     Type: AWS::Lambda::Function
