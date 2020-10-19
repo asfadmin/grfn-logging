@@ -92,10 +92,10 @@ Resources:
               }
             }
       Handler: main.lambda_handler
-      MemorySize: 128
+      MemorySize: 1024
       Role: !GetAtt Role.Arn
       Runtime: python3.8
-      Timeout: 300
+      Timeout: 900
 
   Schedule:
     Type: AWS::Events::Rule
