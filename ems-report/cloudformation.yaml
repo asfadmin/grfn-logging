@@ -91,7 +91,7 @@ Resources:
                 "prefix": "${OutputPrefix}"
               }
             }
-      Handler: main.lambda_handler
+      Handler: ems_report.lambda_handler
       MemorySize: 1024
       Role: !GetAtt Role.Arn
       Runtime: python3.8
