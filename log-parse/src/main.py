@@ -1,16 +1,17 @@
 import csv
 import json
+import re
+from datetime import datetime
+from gzip import GzipFile
+from io import StringIO
+from logging import getLogger
 from os import getenv
 from os.path import basename
-from logging import getLogger
-from gzip import GzipFile
-from datetime import datetime
-from io import StringIO
-import re
+
 import boto3
+from aws_requests_auth.aws_auth import AWSRequestsAuth
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.helpers import bulk
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 
 
 log = getLogger()
