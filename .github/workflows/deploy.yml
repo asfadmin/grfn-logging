@@ -1,0 +1,65 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - prod
+      - test
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - environment: logging-prod
+            log_bucket: grfn-logs
+            report_prefix: ems-reports/PROD/
+            deploy_ref: refs/heads/prod
+
+          - environment: logging-test
+            log_bucket: grfn-logs
+            report_prefix: ems-reports/TEST/
+            deploy_ref: refs/heads/test
+
+    environment:
+      name: ${{ matrix.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: install dependencies
+        if: github.ref == matrix.deploy_ref
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r log-parse/requirements.txt -t log-parse/src/
+          python -m pip install -r ems-report/requirements.txt -t ems-report/src/
+      - name: package and deploy
+        if: github.ref == matrix.deploy_ref
+        shell: bash
+        run: |
+          aws cloudformation package \
+            --template-file cloudformation.yaml \
+            --s3-bucket grfn-build \
+            --s3-prefix cloudformation \
+            --output-template-file packaged.yml
+          aws cloudformation deploy \
+            --stack-name ${{ matrix.environment }} \
+            --template-file packaged.yml \
+            --role-arn ${{ secrets.CLOUDFORMATION_ROLE_ARN }} \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              ElasticSearchCidrIp='${{ secrets.ELASTIC_SEARCH_CIDR_IP }}' \
+              LogBucket='${{ matrix.log_bucket }}' \
+              ReportPrefix='${{ matrix.report_prefix }}'

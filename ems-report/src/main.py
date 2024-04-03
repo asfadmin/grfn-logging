@@ -1,12 +1,13 @@
 import json
-from os import getenv
-from logging import getLogger
 from datetime import datetime, timedelta
+from logging import getLogger
+from os import getenv
 from tempfile import NamedTemporaryFile
+
 import boto3
+from aws_requests_auth.aws_auth import AWSRequestsAuth
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.helpers import scan
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 
 
 log = getLogger()
@@ -68,7 +69,8 @@ def upload_report(records, report_date, config):
         for r in records:
             r['category'] = get_category(r['file_name'])
             r['parsed_time'] = datetime.strptime(r['request_time'], '%Y-%m-%dT%H:%M:%S+00:00')
-            f.write('[{parsed_time:%d/%b/%Y:%H:%M:%S}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|{http_status}\n'.format(**r))
+            f.write('[{parsed_time:%d/%b/%Y:%H:%M:%S}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|'
+                    '{http_status}\n'.format(**r))
         f.flush()
         s3.upload_file(f.name, config['bucket'], report_name)
 
