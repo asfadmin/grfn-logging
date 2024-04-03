@@ -41,10 +41,7 @@ jobs:
       - name: install dependencies
         if: github.ref == matrix.deploy_ref
         shell: bash
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements-log-parse.txt -t log-parse/src/
-          python -m pip install -r requirements-ems-report.txt -t ems-report/src/
+        run: make install-lambda-deps
       - name: package and deploy
         if: github.ref == matrix.deploy_ref
         shell: bash
