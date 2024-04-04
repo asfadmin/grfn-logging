@@ -36,21 +36,15 @@ def get_elasticsearch_connection(host):
 
 
 def get_category(file_name: str) -> str:
-    product_name = file_name.split('.')[0]
-
-    if product_name.endswith('v2_0_6'):
+    version = file_name.split('-')[-1].split('.')[0]
+    if version < 'v3':
         if file_name.endswith('.png'):
             return 'SENTINEL-1_INTERFEROGRAMS_BROWSE'
-        if file_name.endswith('.unw_geo.zip'):
-            return 'SENTINEL-1_INSAR_UNWRAPPED_INTERFEROGRAM_AND_COHERENCE_MAP'
         return 'SENTINEL-1_INTERFEROGRAMS'
 
-    if product_name.endswith('v3_0_1'):
-        if file_name.endswith('.png'):
-            return 'ARIA_S1_GUNW_BROWSE'
-        return 'ARIA_S1_GUNW'
-
-    raise ValueError(f'File {file_name} must be v2_0_6 or v3_0_1')
+    if file_name.endswith('.png'):
+        return 'ARIA_S1_GUNW_BROWSE'
+    return 'ARIA_S1_GUNW'
 
 
 def get_records(report_date, config):
