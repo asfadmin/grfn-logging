@@ -35,14 +35,16 @@ def get_elasticsearch_connection(host):
     return es
 
 
-def get_category(file_name):
+def get_category(file_name: str) -> str:
+    version = file_name.split('-')[-1].split('.')[0]
+    if version < 'v3':
+        if file_name.endswith('.png'):
+            return 'SENTINEL-1_INTERFEROGRAMS_BROWSE'
+        return 'SENTINEL-1_INTERFEROGRAMS'
+
     if file_name.endswith('.png'):
-        category = 'SENTINEL-1_INTERFEROGRAMS_BROWSE'
-    elif file_name.endswith('.unw_geo.zip'):
-        category = 'SENTINEL-1_INSAR_UNWRAPPED_INTERFEROGRAM_AND_COHERENCE_MAP'
-    else:
-        category = 'SENTINEL-1_INTERFEROGRAMS'
-    return category
+        return 'ARIA_S1_GUNW_BROWSE'
+    return 'ARIA_S1_GUNW'
 
 
 def get_records(report_date, config):
