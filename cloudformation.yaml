@@ -27,9 +27,11 @@ Resources:
 
   Domain:
     Type: AWS::Elasticsearch::Domain
+    UpdatePolicy:
+      EnableVersionUpgrade: true
     Properties:
       DomainName: !Ref AWS::StackName
-      ElasticsearchVersion: 7.4
+      ElasticsearchVersion: 7.10
       AccessPolicies: !Sub |-
         {
           "Version": "2012-10-17",
