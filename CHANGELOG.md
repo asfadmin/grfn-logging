@@ -15,6 +15,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - For older products:
   - Browse image downloads are reported under the `SENTINEL-1_INTERFEROGRAMS_BROWSE` collection.
   - All other product downloads are reported under the `SENTINEL-1_INTERFEROGRAMS` collection.
+- Upgraded lambda functions to Python 3.12 from Python 3.8.
+- Upgraded Elasticsearch to 7.10 from 7.4.
 
 ### Removed
 - Downloads of `.unw_geo.zip` products are no longer reported under the `SENTINEL-1_INSAR_UNWRAPPED_INTERFEROGRAM_AND_COHERENCE_MAP` collection. This collection was removed within the last year.
