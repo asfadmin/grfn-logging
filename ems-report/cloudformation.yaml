@@ -67,7 +67,7 @@ Resources:
             Resource: !Sub "${DomainArn}/${IndexName}/_search*"
           - Effect: Allow
             Action:
-            - es:ESHttpGet
+            - es:ESHttpPost
             - es:ESHttpDelete
             Resource: !Sub "${DomainArn}/_search/scroll*"
 
