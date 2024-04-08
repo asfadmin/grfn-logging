@@ -31,7 +31,7 @@ Resources:
       EnableVersionUpgrade: true
     Properties:
       DomainName: !Ref AWS::StackName
-      ElasticsearchVersion: 7.10
+      ElasticsearchVersion: "7.10"
       AccessPolicies: !Sub |-
         {
           "Version": "2012-10-17",
