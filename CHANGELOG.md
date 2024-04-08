@@ -17,6 +17,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - All other product downloads are reported under the `SENTINEL-1_INTERFEROGRAMS` collection.
 - Upgraded lambda functions to Python 3.12 from Python 3.8.
 - Upgraded Elasticsearch to 7.10 from 7.4.
+- Upgraded instance type for Elasticsearch domain to `t3.small.search` from `t2.small.elasticsearch`.
 
 ### Removed
 - Downloads of `.unw_geo.zip` products are no longer reported under the `SENTINEL-1_INSAR_UNWRAPPED_INTERFEROGRAM_AND_COHERENCE_MAP` collection. This collection was removed within the last year.
