@@ -63,7 +63,7 @@ Resources:
             Resource: !Sub "arn:aws:s3:::${OutputBucket}/${OutputPrefix}*"
           - Effect: Allow
             Action:
-            - es:ESHttpGet
+            - es:ESHttpPost
             Resource: !Sub "${DomainArn}/${IndexName}/_search*"
           - Effect: Allow
             Action:
