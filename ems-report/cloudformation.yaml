@@ -63,11 +63,11 @@ Resources:
             Resource: !Sub "arn:aws:s3:::${OutputBucket}/${OutputPrefix}*"
           - Effect: Allow
             Action:
-            - es:ESHttpGet
+            - es:ESHttpPost
             Resource: !Sub "${DomainArn}/${IndexName}/_search*"
           - Effect: Allow
             Action:
-            - es:ESHttpGet
+            - es:ESHttpPost
             - es:ESHttpDelete
             Resource: !Sub "${DomainArn}/_search/scroll*"
 
@@ -91,10 +91,10 @@ Resources:
                 "prefix": "${OutputPrefix}"
               }
             }
-      Handler: main.lambda_handler
+      Handler: ems_report.lambda_handler
       MemorySize: 1024
       Role: !GetAtt Role.Arn
-      Runtime: python3.8
+      Runtime: python3.12
       Timeout: 900
 
   Schedule:

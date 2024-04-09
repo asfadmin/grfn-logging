@@ -86,10 +86,10 @@ Resources:
               "host": "${DomainEndpoint}",
               "index": "${IndexName}"
             }
-      Handler: main.lambda_handler
+      Handler: log_parse.lambda_handler
       MemorySize: 128
       Role: !GetAtt Role.Arn
-      Runtime: python3.8
+      Runtime: python3.12
       Timeout: 300
 
   EventPermission:
