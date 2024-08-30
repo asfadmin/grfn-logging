@@ -14,7 +14,7 @@ updates:
     ignore:
       # pin to elasticsearch v7: https://github.com/asfadmin/grfn-logging/issues/81
       - dependency-name: elasticsearch
-        versions: '>7'
+        versions: '>=8'
   - package-ecosystem: github-actions
     directory: /
     schedule:
