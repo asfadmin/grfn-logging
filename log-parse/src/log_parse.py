@@ -21,11 +21,11 @@ index_body = {
     'mappings': {
         'properties': {
             'request_time': {'type': 'date'},
-            'file_name':    {'type': 'keyword'},
-            'user_id':      {'type': 'keyword'},
-            'ip_address':   {'type': 'ip'},
-            'http_status':  {'type': 'long'},
-            'bytes_sent':   {'type': 'long'},
+            'file_name': {'type': 'keyword'},
+            'user_id': {'type': 'keyword'},
+            'ip_address': {'type': 'ip'},
+            'http_status': {'type': 'long'},
+            'bytes_sent': {'type': 'long'},
         },
     },
     'settings': {
@@ -42,17 +42,21 @@ def setup():
 
 
 def get_elasticsearch_connection(host):
-    auth = AWSRequestsAuth(aws_access_key=getenv('AWS_ACCESS_KEY_ID'),
-                           aws_secret_access_key=getenv('AWS_SECRET_ACCESS_KEY'),
-                           aws_token=getenv('AWS_SESSION_TOKEN'),
-                           aws_host=host,
-                           aws_region=getenv('AWS_REGION'),
-                           aws_service='es')
-    es = Elasticsearch(hosts=[{'host': host, 'port': 443}],
-                       use_ssl=True,
-                       verify_certs=True,
-                       http_auth=auth,
-                       connection_class=RequestsHttpConnection)
+    auth = AWSRequestsAuth(
+        aws_access_key=getenv('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key=getenv('AWS_SECRET_ACCESS_KEY'),
+        aws_token=getenv('AWS_SESSION_TOKEN'),
+        aws_host=host,
+        aws_region=getenv('AWS_REGION'),
+        aws_service='es',
+    )
+    es = Elasticsearch(
+        hosts=[{'host': host, 'port': 443}],
+        use_ssl=True,
+        verify_certs=True,
+        http_auth=auth,
+        connection_class=RequestsHttpConnection,
+    )
     return es
 
 
@@ -86,14 +90,15 @@ def get_cloudfront_records(bucket, key):
     marshalled_records = [
         {
             '_id': record[14],
-            'request_time': datetime.strptime(record[0]+record[1]+'+0000', "%Y-%m-%d%H:%M:%S%z"),
+            'request_time': datetime.strptime(record[0] + record[1] + '+0000', '%Y-%m-%d%H:%M:%S%z'),
             'ip_address': record[4],
             'file_name': basename(record[7]),
             'user_id': get_user_id(record[11]),
             'http_status': to_number(record[8]),
             'bytes_sent': to_number(record[3]),
         }
-        for record in records if not record[0].startswith('#') and record[5] == 'GET' and record[8] in ['200', '206']
+        for record in records
+        if not record[0].startswith('#') and record[5] == 'GET' and record[8] in ['200', '206']
     ]
     return marshalled_records
 
@@ -103,6 +108,6 @@ def lambda_handler(event, context):
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        log.info('Processing file s3://{0}/{1}'.format(bucket, key))
+        log.info(f'Processing file s3://{bucket}/{key}')
         records = get_cloudfront_records(bucket, key)
         update_elasticsearch(records, config)
