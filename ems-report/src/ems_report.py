@@ -21,17 +21,21 @@ def setup():
 
 
 def get_elasticsearch_connection(host):
-    auth = AWSRequestsAuth(aws_access_key=getenv('AWS_ACCESS_KEY_ID'),
-                           aws_secret_access_key=getenv('AWS_SECRET_ACCESS_KEY'),
-                           aws_token=getenv('AWS_SESSION_TOKEN'),
-                           aws_host=host,
-                           aws_region=getenv('AWS_REGION'),
-                           aws_service='es')
-    es = Elasticsearch(hosts=[{'host': host, 'port': 443}],
-                       use_ssl=True,
-                       verify_certs=True,
-                       http_auth=auth,
-                       connection_class=RequestsHttpConnection)
+    auth = AWSRequestsAuth(
+        aws_access_key=getenv('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key=getenv('AWS_SECRET_ACCESS_KEY'),
+        aws_token=getenv('AWS_SESSION_TOKEN'),
+        aws_host=host,
+        aws_region=getenv('AWS_REGION'),
+        aws_service='es',
+    )
+    es = Elasticsearch(
+        hosts=[{'host': host, 'port': 443}],
+        use_ssl=True,
+        verify_certs=True,
+        http_auth=auth,
+        connection_class=RequestsHttpConnection,
+    )
     return es
 
 
@@ -71,14 +75,16 @@ def upload_report(records, report_date, config):
         for r in records:
             r['category'] = get_category(r['file_name'])
             r['parsed_time'] = datetime.strptime(r['request_time'], '%Y-%m-%dT%H:%M:%S+00:00')
-            f.write('[{parsed_time:%d/%b/%Y:%H:%M:%S}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|'
-                    '{http_status}\n'.format(**r))
+            f.write(
+                '[{parsed_time:%d/%b/%Y:%H:%M:%S}]|&|{category}|&|{ip_address}|&|{user_id}|&|{bytes_sent}|&|'
+                '{http_status}\n'.format(**r)
+            )
         f.flush()
         s3.upload_file(f.name, config['bucket'], report_name)
 
 
 def generate_ems_report(report_date, config):
-    log.info('Generating GRFN EMS report for {:%Y-%m-%d}'.format(report_date))
+    log.info(f'Generating GRFN EMS report for {report_date:%Y-%m-%d}')
     records = get_records(report_date, config['elasticsearch'])
     upload_report(records, report_date, config['output'])
 

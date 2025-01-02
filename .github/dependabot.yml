@@ -5,17 +5,19 @@
 
 version: 2
 updates:
-  - package-ecosystem: "pip"
-    directory: "/"
+  - package-ecosystem: pip
+    directory: /
     schedule:
-      interval: "daily"
+      interval: weekly
+    labels:
+      - bumpless
     ignore:
-      - dependency-name: "elasticsearch"
-    labels:
-      - "bumpless"
-  - package-ecosystem: "github-actions"
-    directory: "/"
+      # pin to elasticsearch v7: https://github.com/asfadmin/grfn-logging/issues/81
+      - dependency-name: elasticsearch
+        versions: '>=8'
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "daily"
+      interval: weekly
     labels:
-      - "bumpless"
+      - bumpless
