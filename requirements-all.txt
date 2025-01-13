@@ -1,3 +1,6 @@
 -r requirements-ems-report.txt
 -r requirements-log-parse.txt
 pytest==8.3.4
+ruff
+mypy
+types-requests
