@@ -1,7 +1,7 @@
 import json
+import os
 from datetime import datetime, timedelta
 from logging import getLogger
-from os import getenv
 from tempfile import NamedTemporaryFile
 
 import boto3
@@ -16,17 +16,17 @@ s3 = boto3.client('s3')
 
 def setup():
     log.setLevel('INFO')
-    config = json.loads(getenv('CONFIG'))
+    config = json.loads(os.environ['CONFIG'])
     return config
 
 
 def get_elasticsearch_connection(host):
     auth = AWSRequestsAuth(
-        aws_access_key=getenv('AWS_ACCESS_KEY_ID'),
-        aws_secret_access_key=getenv('AWS_SECRET_ACCESS_KEY'),
-        aws_token=getenv('AWS_SESSION_TOKEN'),
+        aws_access_key=os.getenv('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+        aws_token=os.getenv('AWS_SESSION_TOKEN'),
         aws_host=host,
-        aws_region=getenv('AWS_REGION'),
+        aws_region=os.getenv('AWS_REGION'),
         aws_service='es',
     )
     es = Elasticsearch(

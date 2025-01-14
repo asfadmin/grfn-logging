@@ -1,12 +1,11 @@
 import csv
 import json
+import os
 import re
 from datetime import datetime
 from gzip import GzipFile
 from io import StringIO
 from logging import getLogger
-from os import getenv
-from os.path import basename
 
 import boto3
 from aws_requests_auth.aws_auth import AWSRequestsAuth
@@ -37,17 +36,17 @@ index_body = {
 
 def setup():
     log.setLevel('INFO')
-    config = json.loads(getenv('CONFIG'))
+    config = json.loads(os.environ['CONFIG'])
     return config
 
 
 def get_elasticsearch_connection(host):
     auth = AWSRequestsAuth(
-        aws_access_key=getenv('AWS_ACCESS_KEY_ID'),
-        aws_secret_access_key=getenv('AWS_SECRET_ACCESS_KEY'),
-        aws_token=getenv('AWS_SESSION_TOKEN'),
+        aws_access_key=os.getenv('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+        aws_token=os.getenv('AWS_SESSION_TOKEN'),
         aws_host=host,
-        aws_region=getenv('AWS_REGION'),
+        aws_region=os.getenv('AWS_REGION'),
         aws_service='es',
     )
     es = Elasticsearch(
@@ -92,7 +91,7 @@ def get_cloudfront_records(bucket, key):
             '_id': record[14],
             'request_time': datetime.strptime(record[0] + record[1] + '+0000', '%Y-%m-%d%H:%M:%S%z'),
             'ip_address': record[4],
-            'file_name': basename(record[7]),
+            'file_name': os.path.basename(record[7]),
             'user_id': get_user_id(record[11]),
             'http_status': to_number(record[8]),
             'bytes_sent': to_number(record[3]),
