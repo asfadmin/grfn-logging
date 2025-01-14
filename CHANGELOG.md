@@ -8,6 +8,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.2.1]
 
+### Added
+- Added `mypy` to static analysis workflow.
+
 ### Changed
 - Replaced `flake8` with `ruff`.
 
