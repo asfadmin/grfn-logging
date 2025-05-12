@@ -1,3 +1,3 @@
 aws-requests-auth==0.4.3
-boto3==1.38.8
+boto3==1.38.13
 elasticsearch==7.17.12
