@@ -11,6 +11,10 @@ updates:
       interval: weekly
     labels:
       - bumpless
+    groups:
+      pip-deps:
+        patterns:
+          - "*"
     ignore:
       # pin to elasticsearch v7: https://github.com/asfadmin/grfn-logging/issues/81
       - dependency-name: elasticsearch
@@ -21,3 +25,7 @@ updates:
       interval: weekly
     labels:
       - bumpless
+    groups:
+      github-actions-deps:
+        patterns:
+          - "*"
