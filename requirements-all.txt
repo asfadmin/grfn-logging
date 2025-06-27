@@ -2,6 +2,6 @@
 -r requirements-log-parse.txt
 cfn-lint==1.36.1
 pytest==8.4.1
-ruff==0.12.0
+ruff==0.12.1
 mypy==1.16.1
 types-requests
