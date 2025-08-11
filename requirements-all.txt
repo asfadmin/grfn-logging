@@ -1,7 +1,7 @@
 -r requirements-ems-report.txt
 -r requirements-log-parse.txt
-cfn-lint==1.38.1
+cfn-lint==1.38.2
 pytest==8.4.1
-ruff==0.12.7
+ruff==0.12.8
 mypy==1.17.1
 types-requests
